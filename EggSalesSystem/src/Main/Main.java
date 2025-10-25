@@ -10,16 +10,6 @@ public class Main {
 
     private static String loggedInUserType = null;
     
-    // Placeholder for a generic delete method (Assume this is in dbConnect for production)
-    // IMPORTANT: If dbConnect has a deleteRecord method, you can remove this placeholder.
-    /*
-    public static void deleteRecord(dbConnect con, String sql, Object... params) {
-        // In a real application, this would execute the DELETE SQL statement
-        // For this example, we assume con.updateRecord can handle DELETE
-        con.updateRecord(sql, params); 
-    }
-    */
-    
 
     public static void viewCustomers(dbConnect con) {
         String Query = "SELECT * FROM tbl_customer";
@@ -123,7 +113,7 @@ public class Main {
         while (true) {
             if (sc.hasNextInt()) {
                 typeChoice = sc.nextInt();
-                sc.nextLine(); // Consume newline
+                sc.nextLine();
                 if (typeChoice == 1 || typeChoice == 2) {
                     break;
                 }
@@ -156,8 +146,8 @@ public class Main {
         
         System.out.println("\n1. Approve/Activate a User");
         System.out.println("2. Deactivate a User");
-        System.out.println("3. Delete a User (Permanent)"); // NEW
-        System.out.println("4. Back to Main Menu"); // Changed from 3 to 4
+        System.out.println("3. Delete a User (Permanent)"); 
+        System.out.println("4. Back to Main Menu"); 
         System.out.print("Enter choice: ");
         
         int choice = 0;
@@ -190,9 +180,9 @@ public class Main {
             
             System.out.printf("User ID %d status successfully changed to %s.%n", userId, newStatus);
             viewUsers(con); 
-        } else if (choice == 3) { // NEW: Delete User
+        } else if (choice == 3) { 
             deleteUser(sc, con);
-        } else if (choice == 4) { // Changed from 3 to 4
+        } else if (choice == 4) {
             System.out.println("Returning to main menu.");
         } else {
             System.out.println("Invalid choice.");
@@ -221,18 +211,15 @@ public class Main {
         String confirmation = sc.nextLine();
         
         if (confirmation.equalsIgnoreCase("Y")) {
-            // Step 1: Reverse Stock (Optional, but good practice for soft delete or audit)
-            // For a hard delete, we need to manually reverse the stock.
-            // This is complex and depends on the specific logic. For simplicity and following 
-            // the CRUD request, we'll focus on the DELETE SQL.
             
-            // Step 2: Delete Sale Items first (due to foreign key constraint)
+            
+            
             String deleteItemsSql = "DELETE FROM tbl_sale_item WHERE sale_id = ?";
-            con.updateRecord(deleteItemsSql, saleId); // Assuming updateRecord can handle DELETE
+            con.updateRecord(deleteItemsSql, saleId); 
             
-            // Step 3: Delete Sale Header
+            
             String deleteSaleSql = "DELETE FROM tbl_sale WHERE sale_id = ?";
-            con.updateRecord(deleteSaleSql, saleId); // Assuming updateRecord can handle DELETE
+            con.updateRecord(deleteSaleSql, saleId); 
             
             System.out.printf("Sale ID %d and its items successfully DELETED.%n", saleId);
         } else {
@@ -240,7 +227,7 @@ public class Main {
         }
     }
     
-    // Deletes a specific Customer
+   
     public static void deleteCustomer(Scanner sc, dbConnect con) {
         viewCustomers(con);
         System.out.println("\n--- DELETE CUSTOMER ---");
@@ -256,7 +243,7 @@ public class Main {
         }
         sc.nextLine();
         
-        // Check for existing sales (due to foreign key constraint)
+        
         String checkSalesSql = "SELECT COUNT(*) AS sale_count FROM tbl_sale WHERE customer_id = ?";
         List<Map<String, Object>> salesResult = con.fetchRecords(checkSalesSql, customerId);
         
@@ -287,7 +274,7 @@ public class Main {
         }
     }
     
-    // Deletes a specific User (Admin only)
+   
     public static void deleteUser(Scanner sc, dbConnect con) {
         viewUsers(con);
         System.out.print("Enter the User ID (u_id) to DELETE: ");
@@ -370,9 +357,9 @@ public class Main {
             if ("Admin".equalsIgnoreCase(loggedInUserType)) {
                 System.out.println("2. Manage Products");
                 System.out.println("3. View All Sales History");
-                System.out.println("4. Delete a Sale (Admin Only)"); // NEW
+                System.out.println("4. Delete a Sale (Admin Only)"); 
                 System.out.println("5. Manage Customers");
-                System.out.println("6. ** Manage User Approvals / Deletions **"); // Updated description
+                System.out.println("6. ** Manage User Approvals / Deletions **");
                 System.out.println("7. Exit"); // Changed from 6 to 7
             } else { 
                 System.out.println("2. View All Sales History");
@@ -387,8 +374,8 @@ public class Main {
                 choice = sc.nextInt();
                 if ("Staff".equalsIgnoreCase(loggedInUserType) && choice > 1) {
                     if (choice == 2) choice = 3;
-                    else if (choice == 3) choice = 5; // Staff option 3 maps to Admin option 5 (Manage Customers)
-                    else if (choice == 4) choice = 7; // Staff option 4 maps to Admin option 7 (Exit)
+                    else if (choice == 3) choice = 5; 
+                    else if (choice == 4) choice = 7; 
                 }
             } else {
                 System.out.println("Invalid input. Please enter a number.");
@@ -407,7 +394,7 @@ public class Main {
                     if ("Admin".equalsIgnoreCase(loggedInUserType)) {
                             manageProducts(sc, con);
                     } else {
-                        // This case is only reachable for staff if choice re-mapping failed, but let's keep it clean
+                        
                         System.out.println("Access Denied. Product Management requires Admin privileges.");
                     }
                     break;
@@ -419,7 +406,7 @@ public class Main {
                     break;
                     
                 case 4:
-                    // Admin: Delete a Sale / Staff: Exit (already remapped to case 7)
+                
                     if ("Admin".equalsIgnoreCase(loggedInUserType)) {
                         deleteSale(sc, con);
                     } else {
@@ -428,12 +415,12 @@ public class Main {
                     break;
                     
                 case 5:
-                    // Admin: Manage Customers / Staff: Manage Customers
+                    
                     manageCustomers(sc, con);
                     break;
 
                 case 6:
-                    // Admin: Manage User Approvals / Deletions (Staff access is blocked by menu structure)
+                   
                     if ("Admin".equalsIgnoreCase(loggedInUserType)) {
                         manageUserApproval(sc, con);
                     } else {
@@ -442,7 +429,7 @@ public class Main {
                     break;
 
                 case 7:
-                    // Admin: Exit / Staff: Exit
+                    
                     System.out.println("System shutting down. Goodbye! 👋");
                     System.exit(0);
                     break;
@@ -470,7 +457,7 @@ public class Main {
             customerId = sc.nextInt();
         } catch (java.util.InputMismatchException e) {
             System.out.println("Invalid input for Customer ID. Aborting sale.");
-            sc.nextLine(); // Clear the buffer
+            sc.nextLine(); 
             return;
         }
         sc.nextLine(); 
@@ -683,4 +670,5 @@ public class Main {
             default -> System.out.println("Invalid choice for Customer Management.");
         }
     }
+
 }
